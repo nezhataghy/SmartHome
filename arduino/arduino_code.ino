@@ -1,6 +1,8 @@
 #include <DHT.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <Keypad.h>
+#include <Servo.h>
 
 #define DHTPIN 2
 #define DHTTYPE DHT11
@@ -15,7 +17,7 @@ DHT dht(DHTPIN, DHTTYPE);
 SensorData data;
 int LDR = A0;
 const int FAN = 3;
-const int LED = 11;
+const int LED = 12;
 LiquidCrystal_I2C lcd(0x27, 16, 2); // the LCD address and dimensions
 
 bool LedON = false;
@@ -28,6 +30,24 @@ const int numReadings = 20;        // Number of readings to average
 // Debouncing parameters
 const int debounceCount = 3;       // Number of stable readings needed to confirm a change
 int stableReadingCount = 0;
+
+// Keypad setup
+const byte ROWS = 4; // four rows
+const byte COLS = 4; // four columns
+char keys[ROWS][COLS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+byte rowPins[ROWS] = {11, 10, 9, 8};
+byte colPins[COLS] = {7, 6, 5, 4};
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+Servo myServo;
+const int servoPin = 13;
+String inputPassword = "";
+const String password = "1998";
 
 SensorData sendSensor() {
   SensorData result;
@@ -47,12 +67,21 @@ int readLDR() {
   return sum / numReadings;
 }
 
+void openDoor() {
+  myServo.write(90);
+  delay(5000);
+  myServo.write(0);
+}
+
 void setup() {
   Serial.begin(9600);
   pinMode(LDR, INPUT);
   pinMode(FAN, OUTPUT);
   pinMode(LED, OUTPUT);
   dht.begin();
+  myServo.attach(servoPin);
+  myServo.write(0); // Initial position
+
   lcd.init();                      // initializing the LCD
   lcd.backlight();                
   lcd.setCursor(0, 0);
@@ -96,25 +125,52 @@ void loop() {
   Serial.print("LDR sensor value = ");
   Serial.println(LDRValue);
 
-    if ((LDRValue < 100) && (LedON == false)) { // Adjust threshold if needed
+    if ((LDRValue < 100) && (LedON == false)) { 
     stableReadingCount++;
     if (stableReadingCount >= debounceCount) {
       digitalWrite(LED, HIGH);
       LedON = true;
       Serial.println("It's Dark Outside; Light ON");
-      stableReadingCount = 0; // Reset counter
+      stableReadingCount = 0; // Reseting counter
     }
-  } else if ((LDRValue >= 100) && (LedON == true)) { // Adjust threshold if needed
+  } else if ((LDRValue >= 100) && (LedON == true)) { 
     stableReadingCount++;
     if (stableReadingCount >= debounceCount) {
       digitalWrite(LED, LOW);
       LedON = false;
       Serial.println("It's Bright Outside; Light OFF");
-      stableReadingCount = 0; // Reset counter
+      stableReadingCount = 0; // Reseting counter
     }
   } else {
-    stableReadingCount = 0; // Reset counter if reading is inconsistent
+    stableReadingCount = 0; // Reseting counter if reading is inconsistent
   }
 
-  delay(2000);
+  // Reading keypad input
+  char key = keypad.getKey();
+  if (key) {
+    if (key == '#') { // Checking password
+      if (inputPassword == password) {
+
+        lcd.clear();
+        Serial.println("Password correct");
+        lcd.print("Access Granted");
+        openDoor();
+      } else {
+        Serial.println("Password incorrect");
+        lcd.clear();
+        lcd.print("Access Denied");
+        delay(1000);
+      }
+      inputPassword = ""; // Reseting input password
+    } else if (key == '*') { 
+      inputPassword = "";
+      Serial.println("Input reset");
+    } else { // Adding key to password
+      inputPassword += key;
+      Serial.print("Current input: ");
+      Serial.println(inputPassword);
+    }
+  }
+
+  delay(200);
 }
