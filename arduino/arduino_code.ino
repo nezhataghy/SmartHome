@@ -7,24 +7,27 @@
 #define DHTPIN 2
 #define DHTTYPE DHT11
 
+DHT dht(DHTPIN, DHTTYPE);
+
 struct SensorData {
   float temperature;
   float humidity;
   int flameValue;
 };
 
-DHT dht(DHTPIN, DHTTYPE);
-
 SensorData data;
+
 int LDR = A0; // Analog output pin of the LDR sensor
 const int FLAME_SENSOR_AO = A1; // Analog output pin of the flame sensor
 const int FAN = 3;
 const int PIR_PIN = 4;
 const int ALARM = 5;
+const int TRIG_PIN = 6; 
+const int ECHO_PIN = 7; 
 Servo myServo;
 const int Door = 13;
 const int OutdoorLED = 22;
-
+const int ULTRASONIC_LED = 23; // LED controlled by ultrasonic sensor
 
 LiquidCrystal_I2C lcd(0x27, 16, 2); // the LCD address and dimensions
 
@@ -57,6 +60,7 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 String inputPassword = "";
 const String password = "9898";
 
+
 SensorData sendSensor() {
   SensorData result;
   
@@ -85,10 +89,24 @@ void openDoor() {
 }
 
 
+long readUltrasonicDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  long duration = pulseIn(ECHO_PIN, HIGH);
+  long distance = (duration / 2) / 29.1;
+  return distance;
+}
+
+
 void setup() {
   Serial.begin(9600);
   dht.begin();
 
+  pinMode(ECHO_PIN, INPUT);
   pinMode(FLAME_SENSOR_AO, INPUT);
   pinMode(LDR, INPUT);
   pinMode(PIR_PIN, INPUT);
@@ -96,6 +114,8 @@ void setup() {
   pinMode(ALARM, OUTPUT);
   pinMode(FAN, OUTPUT);
   pinMode(OutdoorLED, OUTPUT);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ULTRASONIC_LED, OUTPUT);
   
   myServo.attach(Door);
   myServo.write(0); // Initial position
@@ -139,6 +159,20 @@ void loop() {
   } else {
     digitalWrite(ALARM, LOW);  
     Serial.println("No flame detected.");
+  }
+
+  // Ultrasonic sensor logic
+  long distance = readUltrasonicDistance();
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  if (distance < 20) { 
+    digitalWrite(ULTRASONIC_LED, HIGH);
+    Serial.println("Object detected! LED ON");
+  } else {
+    digitalWrite(ULTRASONIC_LED, LOW);
+    Serial.println("No object detected. LED OFF");
   }
 
   // Displaying sensor data on LCD
@@ -204,6 +238,6 @@ void loop() {
       Serial.println(inputPassword);
     }
   }
-  
+
   delay(200);
 }
