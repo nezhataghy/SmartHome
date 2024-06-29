@@ -10,17 +10,20 @@
 struct SensorData {
   float temperature;
   float humidity;
+  int flameValue;
 };
 
 DHT dht(DHTPIN, DHTTYPE);
 
 SensorData data;
-int LDR = A0;
+int LDR = A0; // Analog output pin of the LDR sensor
+const int FLAME_SENSOR_AO = A1; // Analog output pin of the flame sensor
 const int FAN = 3;
 const int PIR_PIN = 4;
-const int OutdoorLED = 22;
+const int ALARM = 5;
 Servo myServo;
-const int servoPin = 13;
+const int Door = 13;
+const int OutdoorLED = 22;
 
 
 LiquidCrystal_I2C lcd(0x27, 16, 2); // the LCD address and dimensions
@@ -47,21 +50,23 @@ char keys[ROWS][COLS] = {
   {'7','8','9','C'},
   {'*','0','#','D'}
 };
-byte rowPins[ROWS] = {11, 10, 9, 8};
-byte colPins[COLS] = {7, 6, 5, 4};
+byte rowPins[ROWS] = {40, 41, 42, 43};
+byte colPins[COLS] = {44, 45, 46, 47};
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 String inputPassword = "";
-const String password = "1998";
+const String password = "9898";
 
 SensorData sendSensor() {
   SensorData result;
   
   result.temperature = dht.readTemperature();
   result.humidity = dht.readHumidity();
+  result.flameValue = analogRead(FLAME_SENSOR_AO);
 
   return result;
 }
+
 
 int readLDR() {
   long sum = 0;
@@ -72,23 +77,27 @@ int readLDR() {
   return sum / numReadings;
 }
 
+
 void openDoor() {
   myServo.write(90);
   delay(5000);
   myServo.write(0);
 }
 
+
 void setup() {
   Serial.begin(9600);
   dht.begin();
 
-  pinMode(PIR_PIN, INPUT);
-  pinMode(FAN, OUTPUT);
+  pinMode(FLAME_SENSOR_AO, INPUT);
   pinMode(LDR, INPUT);
-  pinMode(OutdoorLED, OUTPUT);
+  pinMode(PIR_PIN, INPUT);
 
+  pinMode(ALARM, OUTPUT);
+  pinMode(FAN, OUTPUT);
+  pinMode(OutdoorLED, OUTPUT);
   
-  myServo.attach(servoPin);
+  myServo.attach(Door);
   myServo.write(0); // Initial position
 
   lcd.init();                      // initializing the LCD
@@ -100,6 +109,7 @@ void setup() {
   delay(5000);
   lcd.clear();
 }
+
 
 void loop() {
   unsigned long currentMillis = millis();  // Get the current time
@@ -113,10 +123,22 @@ void loop() {
   // Reading PIR sensor
   pirState = digitalRead(PIR_PIN);
   // Controling the fan based on temperature and motion detection
-  if (data.temperature > 30 && pirState == HIGH) {
+  if (data.temperature > 25 && pirState == HIGH) {
     digitalWrite(FAN, HIGH);
   } else {
     digitalWrite(FAN, LOW); 
+  }
+
+    // Flame sensor logic
+  if (data.flameValue < 500) { 
+    digitalWrite(ALARM, HIGH); 
+    Serial.println("Flame detected! ALARM ON");
+    lcd.clear();
+    lcd.print("Flame detected!");
+    delay(500);
+  } else {
+    digitalWrite(ALARM, LOW);  
+    Serial.println("No flame detected.");
   }
 
   // Displaying sensor data on LCD
@@ -182,6 +204,6 @@ void loop() {
       Serial.println(inputPassword);
     }
   }
-
+  
   delay(200);
 }
