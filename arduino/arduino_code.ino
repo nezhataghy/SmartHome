@@ -17,10 +17,16 @@ DHT dht(DHTPIN, DHTTYPE);
 SensorData data;
 int LDR = A0;
 const int FAN = 3;
-const int LED = 12;
+const int PIR_PIN = 4;
+const int OutdoorLED = 22;
+Servo myServo;
+const int servoPin = 13;
+
+
 LiquidCrystal_I2C lcd(0x27, 16, 2); // the LCD address and dimensions
 
 bool LedON = false;
+int pirState = LOW;
 
 
 unsigned long previousMillis = 0;  // Stores the last time the function was executed
@@ -30,6 +36,7 @@ const int numReadings = 20;        // Number of readings to average
 // Debouncing parameters
 const int debounceCount = 3;       // Number of stable readings needed to confirm a change
 int stableReadingCount = 0;
+
 
 // Keypad setup
 const byte ROWS = 4; // four rows
@@ -44,8 +51,6 @@ byte rowPins[ROWS] = {11, 10, 9, 8};
 byte colPins[COLS] = {7, 6, 5, 4};
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-Servo myServo;
-const int servoPin = 13;
 String inputPassword = "";
 const String password = "1998";
 
@@ -75,10 +80,14 @@ void openDoor() {
 
 void setup() {
   Serial.begin(9600);
-  pinMode(LDR, INPUT);
-  pinMode(FAN, OUTPUT);
-  pinMode(LED, OUTPUT);
   dht.begin();
+
+  pinMode(PIR_PIN, INPUT);
+  pinMode(FAN, OUTPUT);
+  pinMode(LDR, INPUT);
+  pinMode(OutdoorLED, OUTPUT);
+
+  
   myServo.attach(servoPin);
   myServo.write(0); // Initial position
 
@@ -101,8 +110,10 @@ void loop() {
     data = sendSensor(); // Update sensor data
   }
 
-  // Controling the fan based on temperature
-  if (data.temperature > 30) {
+  // Reading PIR sensor
+  pirState = digitalRead(PIR_PIN);
+  // Controling the fan based on temperature and motion detection
+  if (data.temperature > 30 && pirState == HIGH) {
     digitalWrite(FAN, HIGH);
   } else {
     digitalWrite(FAN, LOW); 
@@ -113,12 +124,12 @@ void loop() {
   lcd.setCursor(0, 0);
   lcd.print("Temp: ");
   lcd.print(data.temperature, 1); // Display temperature with 1 decimal place
-  lcd.print("C");
+  lcd.print(" C");
 
   lcd.setCursor(0, 1);
-  lcd.print("Hum: ");
+  lcd.print("Humi: ");
   lcd.print(data.humidity, 1); // Display humidity with 1 decimal place
-  lcd.print("%");
+  lcd.print(" %");
 
   // Reading LDR value and control LED based on lighting condition
   int LDRValue = readLDR();
@@ -128,7 +139,7 @@ void loop() {
     if ((LDRValue < 100) && (LedON == false)) { 
     stableReadingCount++;
     if (stableReadingCount >= debounceCount) {
-      digitalWrite(LED, HIGH);
+      digitalWrite(OutdoorLED, HIGH);
       LedON = true;
       Serial.println("It's Dark Outside; Light ON");
       stableReadingCount = 0; // Reseting counter
@@ -136,7 +147,7 @@ void loop() {
   } else if ((LDRValue >= 100) && (LedON == true)) { 
     stableReadingCount++;
     if (stableReadingCount >= debounceCount) {
-      digitalWrite(LED, LOW);
+      digitalWrite(OutdoorLED, LOW);
       LedON = false;
       Serial.println("It's Bright Outside; Light OFF");
       stableReadingCount = 0; // Reseting counter
