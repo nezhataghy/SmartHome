@@ -3,7 +3,7 @@ const userSchema = mongoose.Schema(
     {
         name: {
             type: String,
-            required: true
+            required: true, 
         },
         username: {
             type: String, 
@@ -12,19 +12,16 @@ const userSchema = mongoose.Schema(
         },
         email: {
             type: String,
-            required: true,
+            required: true, 
             unique: true 
         },
         password: {
             type: String,
             required: true
         },
-        sensors: [{ 
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'Sensor' }],
-            actuators: [{
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'Actuator' }],
+        sensorsreadings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SensorsReading' }],
+
+        actuators: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Actuator' }],
     },
     {
         timestamps: true
