@@ -45,8 +45,8 @@ int stableReadingCount = 0;
 
 
 // Keypad setup
-const byte ROWS = 4; // four rows
-const byte COLS = 4; // four columns
+const byte ROWS = 4;
+const byte COLS = 4;
 char keys[ROWS][COLS] = {
   {'1','2','3','A'},
   {'4','5','6','B'},
@@ -104,6 +104,7 @@ long readUltrasonicDistance() {
 
 void setup() {
   Serial.begin(9600);
+  Serial1.begin(115200);
   dht.begin();
 
   pinMode(ECHO_PIN, INPUT);
@@ -137,7 +138,13 @@ void loop() {
   // Checking if it's time to execute the function
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis; 
-    data = sendSensor(); // Update sensor data
+    data = sendSensor();
+    // Sending sensor data over Serial to ESP8266
+    Serial.print(data.temperature);
+    Serial.print(",");
+    Serial.print(data.humidity);
+    Serial.print(",");
+    Serial.println(data.flameValue);
   }
 
   // Reading PIR sensor
@@ -152,28 +159,28 @@ void loop() {
     // Flame sensor logic
   if (data.flameValue < 500) { 
     digitalWrite(ALARM, HIGH); 
-    Serial.println("Flame detected! ALARM ON");
+    Serial1.println("Flame detected! ALARM ON");
     lcd.clear();
     lcd.print("Flame detected!");
     delay(500);
   } else {
     digitalWrite(ALARM, LOW);  
-    Serial.println("No flame detected.");
+    Serial1.println("No flame detected.");
   }
 
-  // Ultrasonic sensor logic
-  long distance = readUltrasonicDistance();
-  Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.println(" cm");
+    // Ultrasonic sensor logic
+    long distance = readUltrasonicDistance();
+    Serial1.print("Distance: ");
+    Serial1.print(distance);
+    Serial1.println(" cm");
 
-  if (distance < 20) { 
-    digitalWrite(ULTRASONIC_LED, HIGH);
-    Serial.println("Object detected! LED ON");
-  } else {
-    digitalWrite(ULTRASONIC_LED, LOW);
-    Serial.println("No object detected. LED OFF");
-  }
+    if (distance < 20) { 
+      digitalWrite(ULTRASONIC_LED, HIGH);
+      Serial1.println("Object detected! LED ON");
+    } else {
+      digitalWrite(ULTRASONIC_LED, LOW);
+      Serial1.println("No object detected. LED OFF");
+    }
 
   // Displaying sensor data on LCD
   lcd.clear();
@@ -189,15 +196,15 @@ void loop() {
 
   // Reading LDR value and control LED based on lighting condition
   int LDRValue = readLDR();
-  Serial.print("LDR sensor value = ");
-  Serial.println(LDRValue);
+  Serial1.print("LDR sensor value = ");
+  Serial1.println(LDRValue);
 
     if ((LDRValue < 100) && (LedON == false)) { 
     stableReadingCount++;
     if (stableReadingCount >= debounceCount) {
       digitalWrite(OutdoorLED, HIGH);
       LedON = true;
-      Serial.println("It's Dark Outside; Light ON");
+      Serial1.println("It's Dark Outside; Light ON");
       stableReadingCount = 0; // Reseting counter
     }
   } else if ((LDRValue >= 100) && (LedON == true)) { 
@@ -205,7 +212,7 @@ void loop() {
     if (stableReadingCount >= debounceCount) {
       digitalWrite(OutdoorLED, LOW);
       LedON = false;
-      Serial.println("It's Bright Outside; Light OFF");
+      Serial1.println("It's Bright Outside; Light OFF");
       stableReadingCount = 0; // Reseting counter
     }
   } else {
@@ -219,11 +226,11 @@ void loop() {
       if (inputPassword == password) {
 
         lcd.clear();
-        Serial.println("Password correct");
+        Serial1.println("Password correct");
         lcd.print("Access Granted");
         openDoor();
       } else {
-        Serial.println("Password incorrect");
+        Serial1.println("Password incorrect");
         lcd.clear();
         lcd.print("Access Denied");
         delay(1000);
@@ -231,11 +238,11 @@ void loop() {
       inputPassword = ""; // Reseting input password
     } else if (key == '*') { 
       inputPassword = "";
-      Serial.println("Input reset");
+      Serial1.println("Input reset");
     } else { // Adding key to password
       inputPassword += key;
-      Serial.print("Current input: ");
-      Serial.println(inputPassword);
+      Serial1.print("Current input: ");
+      Serial1.println(inputPassword);
     }
   }
 
