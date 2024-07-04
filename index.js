@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const authenticate = require('./middleware/authenticate');
+const wss = require('./websocketServer');
 
 const app = express()
 
