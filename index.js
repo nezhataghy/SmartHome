@@ -22,6 +22,7 @@ app.use(bodyParser.json());
 // Routes
 app.use('/users', require('./routes/user'));
 app.use('/auth', require('./routes/auth'));
+app.use('/users', require('./routes/user'));
 app.use('/sensors', authenticate, require('./routes/sensor'));
 app.use('/actuators', authenticate, require('./routes/actuator'));
 
