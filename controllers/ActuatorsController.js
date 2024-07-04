@@ -36,13 +36,21 @@ exports.createActuator = async (req, res) => {
 
 exports.getActuatorById = async (req, res) => {
   try {
+    console.log(`Received ID: ${req.params.id}`);
+    
     const actuator = await Actuator.findById(req.params.id);
-    if (!actuator) return res.sendStatus(404);
+    if (!actuator) {
+      console.log('Actuator not found');
+      return res.sendStatus(404);
+    }
+
     res.json(actuator);
   } catch (err) {
+    console.error('Error:', err);
     res.status(500).send(err);
   }
 };
+
 
 exports.updateActuator = async (req, res) => {
   try {
