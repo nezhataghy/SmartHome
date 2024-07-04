@@ -1,5 +1,6 @@
 const Actuator = require('../models/Actuator');
 const User = require('../models/User');
+const wss = require('../websocketServer');
 
 exports.getActuators = async (req, res) => {
   try {
@@ -47,6 +48,14 @@ exports.updateActuator = async (req, res) => {
   try {
     const actuator = await Actuator.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!actuator) return res.sendStatus(404);
+
+  // Broadcast status update
+    wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(actuator));
+    }
+  });
+
     res.json(actuator);
   } catch (err) {
     res.status(500).send(err);
