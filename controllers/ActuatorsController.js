@@ -1,7 +1,20 @@
 const Actuator = require('../models/Actuator');
 const User = require('../models/User');
-const wss = require('../websocketServer');
-const WebSocket = require('ws');
+const WebSocket = require('ws'); 
+
+const wss = new WebSocket.Server({ port: 8080 }); 
+
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+
+  ws.on('message', (message) => {
+    console.log('Received:', message);
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
 
 exports.getActuators = async (req, res) => {
   try {
@@ -59,7 +72,7 @@ exports.updateActuator = async (req, res) => {
     if (!actuator) return res.sendStatus(404);
 
   // Broadcast status update
-  wss.clients.forEach((client) => {
+    wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(actuator));
     }
@@ -68,7 +81,7 @@ exports.updateActuator = async (req, res) => {
     res.json(actuator);
   } catch (err) {
     console.error('Error updating actuator:', err);
-    res.status(500).send(err);
+    res.status(500).send({ message: 'Internal server error', error: err.message });
   }
 };
 
