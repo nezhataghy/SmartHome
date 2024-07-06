@@ -1,4 +1,4 @@
-const SensorsReading = require('../models/Sensor'); // Ensure this matches your actual model name and file path
+const SensorsReading = require('../models/Sensor');
 const User = require('../models/User');
 
 exports.getSensorsReading = async (req, res) => {
@@ -22,12 +22,12 @@ exports.createSensorsReading = async (req, res) => {
       
       await newSensorReading.save();
   
-      // Update user document to add this sensor reading
+      // Update user document 
       await User.findByIdAndUpdate(req.user.id, {
         $push: { sensorsreadings: newSensorReading._id }
       });
   
-      res.sendStatus(201); // Send HTTP status 201 (Created) if successful
+      res.sendStatus(201); 
     } catch (err) {
       console.error('Error saving sensor reading:', err);
       res.status(500).json({ error: 'Failed to save sensor reading' });
