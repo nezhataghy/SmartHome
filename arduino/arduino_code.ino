@@ -61,47 +61,6 @@ String inputPassword = "";
 const String password = "9898";
 
 
-SensorData sendSensor() {
-  SensorData result;
-  
-  result.temperature = dht.readTemperature();
-  result.humidity = dht.readHumidity();
-  result.flameValue = analogRead(FLAME_SENSOR_AO);
-
-  return result;
-}
-
-
-int readLDR() {
-  long sum = 0;
-  for (int i = 0; i < numReadings; i++) {
-    sum += analogRead(LDR);
-    delay(10); // Small delay between readings
-  }
-  return sum / numReadings;
-}
-
-
-void openDoor() {
-  myServo.write(90);
-  delay(5000);
-  myServo.write(0);
-}
-
-
-long readUltrasonicDistance() {
-  digitalWrite(TRIG_PIN, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG_PIN, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG_PIN, LOW);
-
-  long duration = pulseIn(ECHO_PIN, HIGH);
-  long distance = (duration / 2) / 29.1;
-  return distance;
-}
-
-
 void setup() {
   Serial.begin(9600);
   Serial1.begin(115200);
@@ -133,7 +92,7 @@ void setup() {
 
 
 void loop() {
-  unsigned long currentMillis = millis();  // Get the current time
+  unsigned long currentMillis = millis();
 
   // Checking if it's time to execute the function
   if (currentMillis - previousMillis >= interval) {
@@ -147,24 +106,30 @@ void loop() {
     Serial.println(data.flameValue);
   }
 
+  sendToESP("668887687566298c4fb550ec", "LOCKED");
+
   // Reading PIR sensor
   pirState = digitalRead(PIR_PIN);
   // Controling the fan based on temperature and motion detection
   if (data.temperature > 25 && pirState == HIGH) {
     digitalWrite(FAN, HIGH);
+    sendToESP("6688872c7566298c4fb550dc", "ON");
   } else {
     digitalWrite(FAN, LOW); 
+    sendToESP("6688872c7566298c4fb550dc", "OFF");
   }
 
     // Flame sensor logic
   if (data.flameValue < 500) { 
     digitalWrite(ALARM, HIGH); 
     Serial1.println("Flame detected! ALARM ON");
+    sendToESP("668887397566298c4fb550e0", "ON");
     lcd.clear();
     lcd.print("Flame detected!");
     delay(500);
   } else {
     digitalWrite(ALARM, LOW);  
+    sendToESP("668887397566298c4fb550e0", "OFF");
     Serial1.println("No flame detected.");
   }
 
@@ -177,9 +142,11 @@ void loop() {
     if (distance < 20) { 
       digitalWrite(ULTRASONIC_LED, HIGH);
       Serial1.println("Object detected! LED ON");
+      sendToESP("668887567566298c4fb550e8", "ON");
     } else {
       digitalWrite(ULTRASONIC_LED, LOW);
       Serial1.println("No object detected. LED OFF");
+      sendToESP("668887567566298c4fb550e8", "OFF");
     }
 
   // Displaying sensor data on LCD
@@ -203,6 +170,7 @@ void loop() {
     stableReadingCount++;
     if (stableReadingCount >= debounceCount) {
       digitalWrite(OutdoorLED, HIGH);
+      sendToESP("668887487566298c4fb550e4", "ON");
       LedON = true;
       Serial1.println("It's Dark Outside; Light ON");
       stableReadingCount = 0; // Reseting counter
@@ -213,6 +181,7 @@ void loop() {
       digitalWrite(OutdoorLED, LOW);
       LedON = false;
       Serial1.println("It's Bright Outside; Light OFF");
+      sendToESP("668887487566298c4fb550e4", "OFF");
       stableReadingCount = 0; // Reseting counter
     }
   } else {
@@ -246,5 +215,86 @@ void loop() {
     }
   }
 
-  delay(200);
+  delay(2000);
+}
+
+
+SensorData sendSensor() {
+  SensorData result;
+  
+  result.temperature = dht.readTemperature();
+  result.humidity = dht.readHumidity();
+  result.flameValue = analogRead(FLAME_SENSOR_AO);
+
+  return result;
+}
+
+
+int readLDR() {
+  long sum = 0;
+  for (int i = 0; i < numReadings; i++) {
+    sum += analogRead(LDR);
+    delay(10); // Small delay between readings
+  }
+  return sum / numReadings;
+}
+
+
+void openDoor() {
+  myServo.write(90);
+  delay(5000);
+  myServo.write(0);
+  sendToESP("668887687566298c4fb550ec", "LOCKED");
+}
+
+
+long readUltrasonicDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  long duration = pulseIn(ECHO_PIN, HIGH);
+  long distance = (duration / 2) / 29.1;
+  return distance;
+}
+
+
+void controlActuator(String command) {
+  // Spliting command into ID and status
+  int splitIndex = command.indexOf(':');
+  if (splitIndex == -1) {
+    Serial1.println("Invalid command format");
+    return;
+  }
+  String id = command.substring(0, splitIndex);
+  String status = command.substring(splitIndex + 1);
+
+  status.toUpperCase();
+
+  // Controling actuators based on ID and status
+  if (id == "FAN") {
+    digitalWrite(FAN, status == "ON" ? HIGH : LOW);
+  } else if (id == "ALARM") {
+    digitalWrite(ALARM, status == "ON" ? HIGH : LOW);
+  } else if (id == "OutdoorLED") {
+    digitalWrite(OutdoorLED, status == "ON" ? HIGH : LOW);
+  } else if (id == "ULTRASONIC_LED") {
+    digitalWrite(ULTRASONIC_LED, status == "ON" ? HIGH : LOW);
+  } else if (id == "Door") {
+    if (status == "UNLOCKED")
+      openDoor();
+  } else {
+    Serial1.println("Unknown actuator ID");
+  }
+}
+
+
+void sendToESP(const char* id, const char* status) {
+  Serial.print("Update");
+  Serial.print(",");
+  Serial.print(id);
+  Serial.print(":");
+  Serial.println(status);
 }
