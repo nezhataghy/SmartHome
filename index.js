@@ -3,7 +3,6 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const authenticate = require('./middleware/authenticate');
-const wss = require('./websocketServer');
 
 const app = express()
 
@@ -22,7 +21,7 @@ app.use(bodyParser.json());
 // Routes
 app.use('/users', require('./routes/user'));
 app.use('/auth', require('./routes/auth'));
-app.use('/users', require('./routes/user'));
+app.use('/users', authenticate, require('./routes/user'));
 app.use('/sensors', authenticate, require('./routes/sensor'));
 app.use('/actuators', authenticate, require('./routes/actuator'));
 
