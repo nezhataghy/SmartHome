@@ -1,116 +1,123 @@
 .auth-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #a49aaf21;
-  }
-  
-  .header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  
-  .title {
-    font-size: 36px;
-    font-family: 'Cursive', Lucida Handwriting;
-    color: rgba(8, 83, 127, 0.688);
-  }
-  
-  .spacer {
-    height: 20px;
-  }
-  
-  .actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  
-  .auth-section {
-    width: 350px; 
-    height: 450px; 
-    margin: 20px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  
-  .auth-section h2 {
-    text-align: center;
-    font-family: 'Georgia', Lucida Handwriting;
-    margin-bottom: 30px;
-  }
-  
-  .error {
-    color: red;
-    text-align: center;
-  }
-  
-  .success {
-    color: green;
-    text-align: center;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  input[type='text'],
-  input[type='password'],
-  input[type='email'] {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 5px;
-    background-color: #559ee7;
-    color: white;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    opacity: 0.8;
-  }
-  
-  .footer {
-    width: 100%;
-    padding: 20px 0;
-    background-color: #4a90bb1b;
-    text-align: center;
-    margin-top: auto;
-  }
-  
-  .footer-text {
-    margin-bottom: 10px;
-    color: rgb(0, 32, 130);
-    font-family: 'Cursive', Lucida Handwriting;
-  }
-  
-  .social-links {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .social-icon {
-    width: 30px;
-    height: 30px;
-    margin: 0 5px;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #a49aaf21;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo { /* Add logo styling */
+  width: 100px;
+  height: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 10px rgba(58, 19, 109, 0.265);
+}
+
+.title {
+  font-size: 36px;
+  font-family: 'Cursive', Lucida Handwriting;
+  color: rgba(8, 83, 127, 0.688);
+}
+
+.spacer {
+  height: 20px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.auth-section {
+  width: 350px; 
+  height: 450px; 
+  margin: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-section h2 {
+  text-align: center;
+  font-family: 'Georgia', Lucida Handwriting;
+  margin-bottom: 30px;
+}
+
+.error {
+  color: red;
+  text-align: center;
+}
+
+.success {
+  color: green;
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+input[type='text'],
+input[type='password'],
+input[type='email'] {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  background-color: #559ee7;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.footer {
+  width: 100%;
+  padding: 20px 0;
+  background-color: #4a90bb1b;
+  text-align: center;
+  margin-top: auto;
+}
+
+.footer-text {
+  margin-bottom: 10px;
+  color: rgb(0, 32, 130);
+  font-family: 'Cursive', Lucida Handwriting;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+}
+
+.social-icon {
+  width: 30px;
+  height: 30px;
+  margin: 0 5px;
+}

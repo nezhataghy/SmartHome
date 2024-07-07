@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './Authentication.css';
 import logo from '../assets/images/icon.jpg';
 
+
 const Authentication = () => {
   const [loginData, setLoginData] = useState({ identifier: '', password: '' });
   const [registerData, setRegisterData] = useState({ name: '', username: '', email: '', password: '' });
