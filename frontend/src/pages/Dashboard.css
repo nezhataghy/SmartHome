@@ -1,80 +1,87 @@
 .dashboard-container {
-    text-align: center;
-  }
-  
-  .top-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-  
-  .logout-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    background-color: #dc3545; 
-    color: white;
-    cursor: pointer;
-    max-width: 150px; 
-  }
-  
-  .logout-button:hover {
-    background-color: #c82333; 
-  }
-  
-  .sensor-data {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  
-  .chart-container {
-    width: 500px;
-    margin: 10px;
-  }
-  
-  .larger-chart {
-    width: 600px;
-  }
-  
-  .actuator-control {
-    margin-top: 20px;
-  }
-  
-  .actuators {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .actuator {
-    margin: 10px;
-    padding: 10px;
-    border: 2px solid #3a5d8330;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .actuator-info {
-    margin-bottom: 10px;
-    font-family: 'Georgia', Lucida Handwriting;
-  }
-  
-  .button-on {
-    background-color: #dc3545; 
-    color: white;
-  }
-  
-  .button-off {
-    background-color: #28a745; 
-    color: white;
-  }
-  
-  .button-on:hover,
-  .button-off:hover {
-    opacity: 0.8;
-  }
-  
+  text-align: center;
+}
+
+.top-bar {
+  background-color: #f8f9fa;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  width: 50px;
+  height: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 10px rgba(58, 19, 109, 0.265);
+}
+
+.logout-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  background-color: #dc3545; 
+  color: white;
+  cursor: pointer;
+  max-width: 150px; 
+}
+
+.logout-button:hover {
+  background-color: #c82333; 
+}
+
+.sensor-data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.chart-container {
+  width: 500px;
+  margin: 10px;
+}
+
+.larger-chart {
+  width: 600px;
+}
+
+.actuator-control {
+  margin-top: 20px;
+}
+
+.actuators {
+  display: flex;
+  justify-content: center;
+}
+
+.actuator {
+  margin: 10px;
+  padding: 10px;
+  border: 2px solid #3a5d8330;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.actuator-info {
+  margin-bottom: 10px;
+  font-family: 'Georgia', Lucida Handwriting;
+}
+
+.button-on {
+  background-color: #28a745; 
+  color: white;
+}
+
+.button-off {
+  background-color: #dc3545; 
+  color: white;
+}
+
+.button-on:hover,
+.button-off:hover {
+  opacity: 0.8;
+}
