@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Authentication.css';
+import logo from '../assets/images/icon.jpg';
 
 const Authentication = () => {
   const [loginData, setLoginData] = useState({ identifier: '', password: '' });
@@ -52,6 +53,7 @@ const Authentication = () => {
   return (
     <div className="auth-container">
       <div className="header">
+        <img src={logo} alt="Logo" className="logo" />
         <h1 className="title">Welcome to SmartHome Control System</h1>
         <div className="spacer"></div>
       </div>
