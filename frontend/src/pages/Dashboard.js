@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import './Dashboard.css';
+import logo from '../assets/images/icon.jpg';
 
 const Dashboard = () => {
   const [sensors, setSensors] = useState([]);
@@ -14,19 +15,11 @@ const Dashboard = () => {
         const sensorResponse = await axios.get('http://52.87.216.189:5000/sensors', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        console.log('Sensor Data:', sensorResponse.data); // Log the entire sensor data
-        if (sensorResponse.data.length > 0) {
-          console.log('First Sensor Entry:', sensorResponse.data[0]); // Log the first sensor entry
-        }
         setSensors(sensorResponse.data);
 
         const actuatorResponse = await axios.get('http://52.87.216.189:5000/actuators', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        console.log('Actuator Data:', actuatorResponse.data); // Log the entire actuator data
-        if (actuatorResponse.data.length > 0) {
-          console.log('First Actuator Entry:', actuatorResponse.data[0]); // Log the first actuator entry
-        }
         setActuators(actuatorResponse.data);
       } catch (error) {
         console.error('Error fetching data', error);
@@ -34,15 +27,31 @@ const Dashboard = () => {
     };
 
     fetchData();
+
+    const intervalId = setInterval(fetchData, 5000); // Fetch data every 5 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []);
 
   const handleActuatorToggle = async (id, currentState) => {
     try {
-      await axios.put(`http://52.87.216.189:5000/actuators/${id}`, { status: currentState === 'ON' ? 'OFF' : 'ON' }, {
+      let newState = currentState;
+
+      if (currentState === 'ON') {
+        newState = 'OFF';
+      } else if (currentState === 'OFF') {
+        newState = 'ON';
+      } else if (currentState === 'LOCKED') {
+        newState = 'UNLOCKED';
+      } else if (currentState === 'UNLOCKED') {
+        newState = 'LOCKED';
+      }
+
+      await axios.put(`http://52.87.216.189:5000/actuators/${id}`, { status: newState }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       // Update actuator state locally
-      setActuators(actuators.map(actuator => actuator._id === id ? { ...actuator, status: currentState === 'ON' ? 'OFF' : 'ON' } : actuator));
+      setActuators(actuators.map(actuator => actuator._id === id ? { ...actuator, status: newState } : actuator));
     } catch (error) {
       console.error('Error updating actuator', error);
     }
@@ -50,7 +59,6 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    // redirecting to auth page
     window.location.href = '/';
   };
 
@@ -61,7 +69,7 @@ const Dashboard = () => {
     return {
       labels,
       datasets: [{
-        label: key,
+        label: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the first letter of the key
         data,
         fill: false,
         backgroundColor: 'rgba(54, 162, 235, 0.2)', // Blue color for graph points
@@ -70,21 +78,34 @@ const Dashboard = () => {
     };
   };
 
+  const chartOptions = (title) => ({
+    plugins: {
+      title: {
+        display: true,
+        text: title,
+      },
+      legend: {
+        display: false,
+      },
+    },
+  });
+
   return (
     <div className="dashboard-container">
       <div className="top-bar">
+        <img src={logo} alt="Logo" className="logo" />
         <button className="logout-button" onClick={handleLogout}>Logout</button>
       </div>
       <h1>Dashboard</h1>
       <div className="sensor-data">
         <div className="chart-container larger-chart">
-          <Line data={getData('temperature')} options={{ plugins: { legend: { display: false } } }} />
+          <Line data={getData('temperature')} options={chartOptions('Temperature')} />
         </div>
         <div className="chart-container larger-chart">
-          <Line data={getData('humidity')} options={{ plugins: { legend: { display: false } } }} />
+          <Line data={getData('humidity')} options={chartOptions('Humidity')} />
         </div>
         <div className="chart-container larger-chart">
-          <Line data={getData('flameValue')} options={{ plugins: { legend: { display: false } } }} />
+          <Line data={getData('flameValue')} options={chartOptions('Flame Value')} />
         </div>
       </div>
       <div className="actuator-control">
@@ -96,10 +117,20 @@ const Dashboard = () => {
                 {actuator.name}: {actuator.status}
               </div>
               <button
-                className={actuator.status === 'ON' ? 'button-on' : 'button-off'}
+                className={
+                  actuator.status === 'ON' || actuator.status === 'UNLOCKED'
+                    ? 'button-off'
+                    : 'button-on'
+                }
                 onClick={() => handleActuatorToggle(actuator._id, actuator.status)}
               >
-                {actuator.status === 'ON' ? 'Turn OFF' : 'Turn ON'}
+                {actuator.status === 'ON'
+                  ? 'Turn OFF'
+                  : actuator.status === 'OFF'
+                  ? 'Turn ON'
+                  : actuator.status === 'LOCKED'
+                  ? 'UNLOCK'
+                  : 'LOCK'}
               </button>
             </div>
           ))}
