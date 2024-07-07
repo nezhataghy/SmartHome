@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const authenticate = require('./middleware/authenticate');
+const cors = require('cors');
 
 const app = express()
 
@@ -17,6 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Middleware to parse incoming request bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 
 // Routes
 app.use('/users', require('./routes/user'));
