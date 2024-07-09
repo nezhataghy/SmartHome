@@ -9,7 +9,6 @@ This project is a SmartHome system that allows users to control and monitor vari
 - [Arduino Setup](#arduino-setup)
 - [Running the Project](#running-the-project)
 - [Usage](#usage)
-- [License](#license)
 
 ## Prerequisites
 - Node.js (version 14 or higher)
